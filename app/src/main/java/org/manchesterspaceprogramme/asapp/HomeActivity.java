@@ -1,13 +1,14 @@
 package org.manchesterspaceprogramme.asapp;
 
+import android.content.ContentResolver;
 import android.content.Context;
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
+import android.util.AndroidException;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,7 +16,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import org.manchesterspaceprogramme.asapp.beacon.GPSCoordinates;
 import org.manchesterspaceprogramme.asapp.beacon.LandingBeacon;
 
 
@@ -38,11 +38,18 @@ public class HomeActivity extends ActionBarActivity implements LocationListener 
         public void run() {
             Log.i("SMS", "sending SMS");
 
-
-            Log.i("SMS", "sent SMS");
+            ContentResolver cr = getContentResolver();
+            LocationManager locationManager;
+            locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
             status = (TextView) findViewById(R.id.textView);
-            status.setText("message sent " +counter++);
+            try {
+                LandingBeacon.sendSMSMessage(cr, locationManager);
+                status.setText("message sent " + ++counter);
+            } catch (AndroidException ae) {
+                Log.e("LocationBeaconRunnable","Error sending message: ",ae);
+                status.setText("Unable to send message " +ae);
+            }
 
             locationBeaconHandler.postDelayed(this, ONE_MINUTE);
         }
@@ -62,7 +69,7 @@ public class HomeActivity extends ActionBarActivity implements LocationListener 
 
                 Log.i("starting","user clicked start");
 
-                sendMessage();
+
                 locationBeaconHandler.removeCallbacks(locationBeaconRunnable);
 
                 locationBeaconHandler.postDelayed(locationBeaconRunnable, 0);
@@ -78,36 +85,6 @@ public class HomeActivity extends ActionBarActivity implements LocationListener 
             }
         });
     }
-
-    private void sendMessage() {
-        LocationManager locationManager;
-        String provider;
-        LocationListener locator =  new GPSCoordinates();
-
-
-        // Get the location manager
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        locationManager.requestLocationUpdates( LocationManager.GPS_PROVIDER, 0, 0, locator);
-        // Define the criteria how to select the location provider -> use
-        // default
-        Criteria criteria = new Criteria();
-        provider = locationManager.getBestProvider(criteria, false);
-        Location location = locationManager.getLastKnownLocation(provider);
-
-        // Initialize the location fields
-        if (location != null) {
-            System.out.println("Provider " + provider + " has been selected.");
-
-            locator.onLocationChanged(location);
-            String myMapLocation = ((GPSCoordinates)locator).getGoogleMapsUrl();
-
-            LandingBeacon.sendSMSMessage("01010101",myMapLocation);
-        } else {
-            Log.i("locating","Could not initialise location");
-        }
-    }
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
