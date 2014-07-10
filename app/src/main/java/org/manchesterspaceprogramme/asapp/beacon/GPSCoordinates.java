@@ -1,11 +1,11 @@
 package org.manchesterspaceprogramme.asapp.beacon;
 
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.AndroidException;
+import android.util.Log;
 
 /**
  * Class to retrieve and hold our current position.
@@ -21,25 +21,80 @@ public class GPSCoordinates implements LocationListener {
 
     private static final String GOOGLE_MAPS_URL = "https://www.google.com/maps/place/@%s,%s,%sz";
 
-    private final Location location;
+    // The minimum distance to change Updates in meters
+    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // 10 meters
+
+    // The minimum time between updates in milliseconds
+    private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1; // 1 minute
+
+    private Location location;
+
+    private LocationManager locationManager;
+
+
 
     public GPSCoordinates(LocationManager locationManager) throws AndroidException {
 
-        locationManager.requestLocationUpdates( LocationManager.GPS_PROVIDER, 0, 0, this);
         // Define the criteria how to select the location provider -> use
         // default
-        Criteria criteria = new Criteria();
-        String provider = locationManager.getBestProvider(criteria, false);
-        location = locationManager.getLastKnownLocation(provider);
+        this.locationManager = locationManager;
 
+        // getting GPS status
+        boolean isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+        // getting network status
+        boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+
+        if (isGPSEnabled) {
+            Log.i("GPSCO-ORD","GPS Enabled");
+            getGPSLocation();
+
+        }
+        if (isNetworkEnabled) {
+            Log.i("GPSCO-ORD","Network Enabled");
+            getNetworkLocation();
+        }
+        if (!isGPSEnabled && !isNetworkEnabled) {
+            Log.i("GPSCO-ORD","No Location found");
+        }
+
+    }
+
+    private void getGPSLocation() {
         if (location == null) {
-            throw new AndroidException("Unable to obtain location");
+            locationManager.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER,
+                    MIN_TIME_BW_UPDATES,
+                    MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+            Log.d("GPS Enabled", "GPS Enabled");
+            if (locationManager != null) {
+                location = locationManager
+                        .getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            }
+        }
+    }
+
+    private void getNetworkLocation() {
+
+        locationManager.requestLocationUpdates(
+                LocationManager.NETWORK_PROVIDER,
+                MIN_TIME_BW_UPDATES,
+                MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+        Log.d("Network", "Network");
+        if (locationManager != null) {
+            location = locationManager
+                    .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         }
     }
 
 
     @Override
     public void onLocationChanged(Location location) {
+        if (location != null) {
+            this.location = location;
+            Log.d("Location Found", location.getLatitude() + " " + location.getLongitude());
+            locationManager.removeUpdates(this);
+        }
     }
 
     @Override
@@ -58,7 +113,7 @@ public class GPSCoordinates implements LocationListener {
     }
 
     public String getGoogleMapsUrl(int zoom) {
-        return String.format(GOOGLE_MAPS_URL,getLongitude(),getLatitude(), zoom);
+        return String.format(GOOGLE_MAPS_URL,getLatitude(),getLongitude(), zoom);
     }
 
     public String getGoogleMapsUrl() {
@@ -66,16 +121,30 @@ public class GPSCoordinates implements LocationListener {
     }
 
     public String getLatitude() {
-
-        return String.valueOf(location.getLatitude());
+        if (location != null) {
+            return String.valueOf(location.getLatitude());
+        } else {
+            throw new ExceptionInInitializerError("Location not obtained");
+        }
     }
 
     public String getLongitude() {
-        return String.valueOf(location.getLongitude());
+        if (location != null) {
+            return String.valueOf(location.getLongitude());
+        } else {
+            throw new ExceptionInInitializerError("Location not obtained");
+        }
     }
 
     public String getAltitude() {
+        if (location != null) {
+            return String.valueOf(location.getAltitude());
+        } else {
+            throw new ExceptionInInitializerError("Location not obtained");
+        }
+    }
 
-        return String.valueOf(location.getAltitude());
+    public boolean isReady() {
+        return location != null;
     }
 }

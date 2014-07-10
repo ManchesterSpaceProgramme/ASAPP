@@ -19,33 +19,46 @@ public class LandingBeacon {
 
     private static SmsManager smsManager = SmsManager.getDefault();
 
-    public static void sendSMSMessage(ContentResolver cr, LocationManager locationManager) throws AndroidException {
+    private static LocationListener myLocation;
 
-        String message = getLocationMessage(locationManager);
-        List<String> phoneNumbers = AddressBookHandler.getPhoneNumbersFromContacts(cr);
+    private static List<String> phoneNumbers;
+
+    public LandingBeacon(ContentResolver cr, LocationManager locationManager) throws AndroidException {
+        myLocation = new GPSCoordinates(locationManager);
+        phoneNumbers = AddressBookHandler.getPhoneNumbersFromContacts(cr);
+    }
+
+    public void sendSMSMessage() throws AndroidException {
+
 
         if (phoneNumbers.isEmpty()) {
             throw new AndroidException("Error could not send message no contacts set up");
         }
 
-        String phoneNumber = phoneNumbers.get(0);
-        Log.i("sendSMSMessage", String.format("Sending to %s: message: %s", phoneNumber, message));
-        smsManager.sendTextMessage(phoneNumber, null, message, null, null);
-        Log.i("sendSMSMessage","MessageSent");
+        String message = getLocationMessage();
+
+        for (String phoneNumber : phoneNumbers) {
+            Log.i("sendSMSMessage", String.format("Sending to %s: message: %s", phoneNumber, message));
+            smsManager.sendTextMessage(phoneNumber, null, message, null, null);
+            Log.i("sendSMSMessage", "MessageSent");
+        }
 
 
     }
 
 
-    private static String getLocationMessage(LocationManager locationManager) throws AndroidException {
+    private String getLocationMessage() throws AndroidException {
 
-        LocationListener locator =  new GPSCoordinates(locationManager);
-        String myMapLocation = ((GPSCoordinates)locator).getGoogleMapsUrl();
-        String altitude = ((GPSCoordinates) locator).getAltitude();
+        if (((GPSCoordinates)myLocation).isReady()) {
+            String myMapLocation = ((GPSCoordinates) myLocation).getGoogleMapsUrl();
+            String altitude = ((GPSCoordinates) myLocation).getAltitude();
+            String message = String.format("Payload altitude is: %s.  Current location is: %s",altitude,myMapLocation);
 
-        String message = String.format("Payload altitude is: %s.  Current location is: %s",altitude,myMapLocation);
+            return message;
 
-        return message;
+        }
+
+        throw new AndroidException("Location Not Found");
     }
 
 }

@@ -28,6 +28,8 @@ public class HomeActivity extends ActionBarActivity implements LocationListener 
 
     private static int counter;
 
+    private static LandingBeacon beacon;
+
 
     TextView status;
     Button btnStart, btnCancel;
@@ -38,13 +40,10 @@ public class HomeActivity extends ActionBarActivity implements LocationListener 
         public void run() {
             Log.i("SMS", "sending SMS");
 
-            ContentResolver cr = getContentResolver();
-            LocationManager locationManager;
-            locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
             status = (TextView) findViewById(R.id.textView);
             try {
-                LandingBeacon.sendSMSMessage(cr, locationManager);
+
+                beacon.sendSMSMessage();
                 status.setText("message sent " + ++counter);
             } catch (AndroidException ae) {
                 Log.e("LocationBeaconRunnable","Error sending message: ",ae);
@@ -60,6 +59,8 @@ public class HomeActivity extends ActionBarActivity implements LocationListener 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+
+
         btnStart = (Button) findViewById(R.id.start);
         btnCancel = (Button) findViewById(R.id.cancel);
 
@@ -68,11 +69,17 @@ public class HomeActivity extends ActionBarActivity implements LocationListener 
             public void onClick(View arg0) {
 
                 Log.i("starting","user clicked start");
+                try {
+                    ContentResolver cr = getContentResolver();
+                    LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                    beacon = new LandingBeacon(cr, locationManager);
+                    locationBeaconHandler.removeCallbacks(locationBeaconRunnable);
+                    locationBeaconHandler.postDelayed(locationBeaconRunnable, 0);
 
+                } catch (AndroidException ae) {
+                    Log.i("HomeActivity","Unable to start application " +ae);
+                }
 
-                locationBeaconHandler.removeCallbacks(locationBeaconRunnable);
-
-                locationBeaconHandler.postDelayed(locationBeaconRunnable, 0);
                 Log.i("starting","timer launched");
 
             }
