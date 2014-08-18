@@ -21,11 +21,15 @@ public class LandingBeacon {
 
     private static LocationListener myLocation;
 
+    /**
+     * phone numbers
+     */
     private static List<String> phoneNumbers;
 
-    public LandingBeacon(ContentResolver cr, LocationManager locationManager) throws AndroidException {
+    public LandingBeacon(ContentResolver cr, LocationManager locationManager, List<String> phoneNumbers) throws AndroidException {
         myLocation = new GPSCoordinates(locationManager);
-        phoneNumbers = AddressBookHandler.getPhoneNumbersFromContacts(cr);
+        this.phoneNumbers = phoneNumbers;
+
     }
 
     public void sendSMSMessage() throws AndroidException {

@@ -1,85 +1,58 @@
 package org.manchesterspaceprogramme.asapp;
 
-import android.content.ContentResolver;
-import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
-import android.util.AndroidException;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 
-import org.manchesterspaceprogramme.asapp.beacon.LandingBeacon;
+import org.manchesterspaceprogramme.asapp.beacon.AddressBookHandler;
+import org.manchesterspaceprogramme.asapp.beacon.LandingReceiver;
+
+import java.util.ArrayList;
+import java.util.Map;
 
 
 public class HomeActivity extends ActionBarActivity implements LocationListener {
 
-    private static final int ONE_SECOND = 1000;
-    private static final int ONE_MINUTE = 60 * ONE_SECOND;
-    private static final int FIVE_MINUTES = 5 * ONE_MINUTE;
-    private static final int THIRTY_MINUTES = 60 * ONE_MINUTE;
-
     private static int counter;
 
-    private static LandingBeacon beacon;
-
+    LandingReceiver landingReceiver = new LandingReceiver();
 
     TextView status;
     Button btnStart, btnCancel;
     Handler locationBeaconHandler = new Handler();
 
-    Runnable locationBeaconRunnable = new Runnable() {
-        @Override
-        public void run() {
-            Log.i("SMS", "sending SMS");
-
-            status = (TextView) findViewById(R.id.textView);
-            try {
-
-                beacon.sendSMSMessage();
-                status.setText("message sent " + ++counter);
-            } catch (AndroidException ae) {
-                Log.e("LocationBeaconRunnable","Error sending message: ",ae);
-                status.setText("Unable to send message " +ae);
-            }
-
-            locationBeaconHandler.postDelayed(this, ONE_MINUTE);
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-
-
         btnStart = (Button) findViewById(R.id.start);
         btnCancel = (Button) findViewById(R.id.cancel);
+        btnCancel.setVisibility(View.GONE);
 
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
 
                 Log.i("starting","user clicked start");
-                try {
-                    ContentResolver cr = getContentResolver();
-                    LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-                    beacon = new LandingBeacon(cr, locationManager);
-                    locationBeaconHandler.removeCallbacks(locationBeaconRunnable);
-                    locationBeaconHandler.postDelayed(locationBeaconRunnable, 0);
+                Map<String,String> phoneNumbers = AddressBookHandler.getPhoneNumbersFromContacts(getContentResolver());
+                outputFoundContactsToScreen(phoneNumbers);
 
-                } catch (AndroidException ae) {
-                    Log.i("HomeActivity","Unable to start application " +ae);
-                }
 
+                landingReceiver.setAlarm(HomeActivity.this,new ArrayList(phoneNumbers.values()));
+                btnStart.setVisibility(View.GONE);
+                btnCancel.setVisibility(View.VISIBLE);
                 Log.i("starting","timer launched");
 
             }
@@ -88,10 +61,30 @@ public class HomeActivity extends ActionBarActivity implements LocationListener 
         btnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                locationBeaconHandler.removeCallbacks(locationBeaconRunnable);
+                landingReceiver.cancelAlarm(HomeActivity.this);
+                btnCancel.setVisibility(View.GONE);
+                btnStart.setVisibility(View.VISIBLE);
+
             }
         });
     }
+
+    private void outputFoundContactsToScreen(Map<String,String> phoneNumbers) {
+        String[] contacts = new String[phoneNumbers.size()];
+
+        int i=0;
+        for (Map.Entry<String,String> contact : phoneNumbers.entrySet()) {
+            contacts[i++] = String.format("%s (%s)",contact.getKey(),contact.getValue());
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(HomeActivity.this,
+                android.R.layout.simple_list_item_1, android.R.id.text1, contacts);
+
+        ListView names = (ListView) findViewById(R.id.contacts);
+        names.setAdapter(adapter);
+
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

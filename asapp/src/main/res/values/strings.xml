@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">ASAPP</string>
+    <string name="msp_header">Manchester Space Programme</string>
+    <string name="action_settings">Settings</string>
+    <string name="description">This is a High Altitude Balloon Tracking App.</string>
+    <string name="instructions">Add contacts with their names beginning with "MSP_" and SMS messages with the location will be sent to those numbers.</string>
+    <string name="contacts_found_header">Found the following contacts:</string>
+
+    <string name="btn_start">Start</string>
+    <string name="btn_cancel">Cancel</string>
+</resources>

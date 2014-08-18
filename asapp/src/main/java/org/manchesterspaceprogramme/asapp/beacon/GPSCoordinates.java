@@ -10,10 +10,10 @@ import android.util.Log;
 /**
  * Class to retrieve and hold our current position.
  *
- * Google maps uses the following format: "https://www.google.com/maps/place/@53.4840335,-2.2355508,21z"
+ * Google maps uses the following format: "https://www.google.com/maps/place/@-2.2355508,53.4840335,21z"
  * latitude,longitude,zoom level.
- * For use with the emulator run: "telnet localhost 5554" and then "geo fix 53.4840335 -2.2355508 120"
- * "geo fix 53.991192 -0.916221 0"
+ * For use with the emulator run: "telnet localhost 5554" and then "geo fix -2.2355508 53.4840335 120"
+ * "geo fix -0.916221 53.991192  0"
  *
  * Created by dave on 04/07/14.
  */

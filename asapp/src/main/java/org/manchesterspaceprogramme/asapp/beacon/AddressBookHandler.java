@@ -5,18 +5,18 @@ import android.database.Cursor;
 import android.provider.ContactsContract;
 import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by dave on 05/07/14.
  */
 public class AddressBookHandler {
 
-    public static List<String> getPhoneNumbersFromContacts(ContentResolver cr) {
+    public static Map<String,String> getPhoneNumbersFromContacts(ContentResolver cr) {
 
-        List<String> phoneNumbers = new ArrayList<String>();
+        Map<String,String> phoneNumbers = new HashMap<String, String>();
 
         Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI,
                 null, null, null, null);
@@ -32,6 +32,8 @@ public class AddressBookHandler {
 
                 if (name != null && name.toUpperCase().startsWith("MSP_")) {
 
+
+
                     if (Integer.parseInt(cur.getString(cur.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0) {
 
                         Log.i("getPhoneNumbersFromContacts", String.format("name : %s, ID : %s ", name, id));
@@ -43,7 +45,7 @@ public class AddressBookHandler {
                         while (pCur.moveToNext()) {
                             String phone = pCur.getString(
                                     pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                            phoneNumbers.add(phone);
+                            phoneNumbers.put(name,phone);
                         }
                         pCur.close();
                     }
@@ -51,7 +53,7 @@ public class AddressBookHandler {
             }
         }
 
-        return Collections.unmodifiableList(phoneNumbers);
+        return Collections.unmodifiableMap(phoneNumbers);
     }
 
 
