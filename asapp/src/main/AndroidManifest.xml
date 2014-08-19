@@ -12,7 +12,7 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/spacedoge"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
@@ -24,8 +24,9 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".beacon.LandingReceiver"></receiver>
-        <service android:name=".beacon.LandingService" />
+        <receiver android:name="com.commonsware.cwac.locpoll.LocationPoller" />
+        <receiver android:name=".beacon.LandingReceiver" />
+        <service  android:name="com.commonsware.cwac.locpoll.LocationPollerService" />
     </application>
 
 </manifest>

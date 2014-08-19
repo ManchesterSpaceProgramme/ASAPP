@@ -1,18 +1,26 @@
 package org.manchesterspaceprogramme.asapp.beacon;
 
 import android.content.ContentResolver;
+import android.content.Context;
 import android.database.Cursor;
 import android.provider.ContactsContract;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Created by dave on 05/07/14.
  */
 public class AddressBookHandler {
+
+    public static List<String> getPhoneNumbersFromContacts(Context ctx) {
+        Map<String,String> phoneNumbers = getPhoneNumbersFromContacts(ctx.getContentResolver());
+        return new ArrayList<String>(phoneNumbers.values());
+    }
 
     public static Map<String,String> getPhoneNumbersFromContacts(ContentResolver cr) {
 

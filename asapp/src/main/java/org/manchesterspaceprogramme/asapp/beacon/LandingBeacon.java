@@ -1,8 +1,6 @@
 package org.manchesterspaceprogramme.asapp.beacon;
 
-import android.content.ContentResolver;
-import android.location.LocationListener;
-import android.location.LocationManager;
+import android.location.Location;
 import android.telephony.SmsManager;
 import android.util.AndroidException;
 import android.util.Log;
@@ -19,15 +17,15 @@ public class LandingBeacon {
 
     private static SmsManager smsManager = SmsManager.getDefault();
 
-    private static LocationListener myLocation;
+    private static GPSCoordinates myLocation;
 
     /**
      * phone numbers
      */
     private static List<String> phoneNumbers;
 
-    public LandingBeacon(ContentResolver cr, LocationManager locationManager, List<String> phoneNumbers) throws AndroidException {
-        myLocation = new GPSCoordinates(locationManager);
+    public LandingBeacon(Location location, List<String> phoneNumbers) throws AndroidException {
+        myLocation = new GPSCoordinates(location);
         this.phoneNumbers = phoneNumbers;
 
     }
@@ -53,9 +51,9 @@ public class LandingBeacon {
 
     private String getLocationMessage() throws AndroidException {
 
-        if (((GPSCoordinates)myLocation).isReady()) {
-            String myMapLocation = ((GPSCoordinates) myLocation).getGoogleMapsUrl();
-            String altitude = ((GPSCoordinates) myLocation).getAltitude();
+        if (myLocation.isReady()) {
+            String myMapLocation = myLocation.getGoogleMapsUrl();
+            String altitude = myLocation.getAltitude();
             String message = String.format("Payload altitude is: %s.  Current location is: %s",altitude,myMapLocation);
 
             return message;

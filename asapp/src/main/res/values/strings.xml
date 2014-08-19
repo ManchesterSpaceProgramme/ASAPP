@@ -7,6 +7,9 @@
     <string name="description">This is a High Altitude Balloon Tracking App.</string>
     <string name="instructions">Add contacts with their names beginning with "MSP_" and SMS messages with the location will be sent to those numbers.</string>
     <string name="contacts_found_header">Found the following contacts:</string>
+    <string name="alarm_status">@string/alarm_status_stopped</string>
+    <string name="alarm_status_running">Tracking is active.</string>
+    <string name="alarm_status_stopped">Tracking is stopped.</string>
 
     <string name="btn_start">Start</string>
     <string name="btn_cancel">Cancel</string>

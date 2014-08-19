@@ -1,9 +1,15 @@
 package org.manchesterspaceprogramme.asapp;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -13,6 +19,9 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.commonsware.cwac.locpoll.LocationPoller;
+import com.commonsware.cwac.locpoll.LocationPollerParameter;
 
 import org.manchesterspaceprogramme.asapp.beacon.AddressBookHandler;
 import org.manchesterspaceprogramme.asapp.beacon.LandingReceiver;
@@ -27,9 +36,26 @@ public class HomeActivity extends ActionBarActivity implements LocationListener 
 
     LandingReceiver landingReceiver = new LandingReceiver();
 
+    private static final int ONE_SECOND = 1000;
+    private static final int ONE_MINUTE = 60 * ONE_SECOND;
+    private static final int TWO_MINUTES = 2 * ONE_MINUTE;
+    private static final int FIVE_MINUTES = 5 * ONE_MINUTE;
+    private static final int THIRTY_MINUTES = 60 * ONE_MINUTE;
+
+    private static final int PERIOD = FIVE_MINUTES;
+
+    // The app's AlarmManager, which provides access to the system alarm services.
+    private AlarmManager mgr;
+    // The pending intent that is triggered when the alarm fires.
+    private PendingIntent pi;
+
     TextView status;
     Button btnStart, btnCancel;
     Handler locationBeaconHandler = new Handler();
+
+    private Map<String,String> phoneNumbers;
+
+
 
 
     @Override
@@ -37,22 +63,33 @@ public class HomeActivity extends ActionBarActivity implements LocationListener 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        phoneNumbers = AddressBookHandler.getPhoneNumbersFromContacts(getContentResolver());
+        outputFoundContactsToScreen(phoneNumbers);
+
         btnStart = (Button) findViewById(R.id.start);
         btnCancel = (Button) findViewById(R.id.cancel);
-        btnCancel.setVisibility(View.GONE);
+
+        if (isAlarmUp()) {
+            btnStart.setVisibility(View.GONE);
+            btnCancel.setVisibility(View.VISIBLE);
+            setAlarmStatusText(R.string.alarm_status_running);
+        } else {
+            btnStart.setVisibility(View.VISIBLE);
+            btnCancel.setVisibility(View.GONE);
+            setAlarmStatusText(R.string.alarm_status_stopped);
+        }
 
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
 
                 Log.i("starting","user clicked start");
-                Map<String,String> phoneNumbers = AddressBookHandler.getPhoneNumbersFromContacts(getContentResolver());
-                outputFoundContactsToScreen(phoneNumbers);
 
 
-                landingReceiver.setAlarm(HomeActivity.this,new ArrayList(phoneNumbers.values()));
+                setAlarm(new ArrayList(phoneNumbers.values()));
                 btnStart.setVisibility(View.GONE);
                 btnCancel.setVisibility(View.VISIBLE);
+                setAlarmStatusText(R.string.alarm_status_running);
                 Log.i("starting","timer launched");
 
             }
@@ -61,12 +98,17 @@ public class HomeActivity extends ActionBarActivity implements LocationListener 
         btnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                landingReceiver.cancelAlarm(HomeActivity.this);
+                cancelAlarm(HomeActivity.this);
                 btnCancel.setVisibility(View.GONE);
                 btnStart.setVisibility(View.VISIBLE);
-
+                setAlarmStatusText(R.string.alarm_status_stopped);
             }
         });
+    }
+
+    private void setAlarmStatusText(int resId) {
+        TextView alarmStatus = (TextView)findViewById(R.id.alarm_status);
+        alarmStatus.setText(resId);
     }
 
     private void outputFoundContactsToScreen(Map<String,String> phoneNumbers) {
@@ -83,6 +125,41 @@ public class HomeActivity extends ActionBarActivity implements LocationListener 
         ListView names = (ListView) findViewById(R.id.contacts);
         names.setAdapter(adapter);
 
+    }
+
+    public void setAlarm(ArrayList<String> phoneNumbers) {
+        mgr=(AlarmManager)getSystemService(ALARM_SERVICE);
+
+        Intent i=new Intent(this, LocationPoller.class);
+
+        Bundle bundle = new Bundle();
+        LocationPollerParameter parameter = new LocationPollerParameter(bundle);
+        parameter.setIntentToBroadcastOnCompletion(new Intent(this, LandingReceiver.class));
+        // try GPS and fall back to NETWORK_PROVIDER
+        parameter.setProviders(new String[] {LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER});
+        parameter.setTimeout(TWO_MINUTES);
+        i.putExtras(bundle);
+
+        pi= PendingIntent.getBroadcast(this, 0, i, 0);
+        mgr.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                SystemClock.elapsedRealtime(),
+                PERIOD,
+                pi);
+        Log.i("setAlarm","Alarm active");
+    }
+
+    private boolean isAlarmUp() {
+        return (PendingIntent.getBroadcast(this, 0,
+                new Intent(this, LocationPoller.class),
+                PendingIntent.FLAG_NO_CREATE) != null);
+    }
+
+    public void cancelAlarm(Context context) {
+        // If the alarm has been set, cancel it.
+        if (mgr != null) {
+            mgr.cancel(pi);
+        }
+        Log.i("setAlarm","Alarm cancelled");
     }
 
 

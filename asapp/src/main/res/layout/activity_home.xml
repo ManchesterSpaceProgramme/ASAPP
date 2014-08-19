@@ -72,4 +72,14 @@
         android:layout_marginTop="10dp" />
 
 
+    <TextView
+        android:id="@+id/alarm_status"
+        android:text="@string/alarm_status"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_below="@+id/contacts"
+        android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+
 </RelativeLayout>
