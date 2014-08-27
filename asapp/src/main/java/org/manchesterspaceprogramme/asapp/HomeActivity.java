@@ -10,6 +10,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -40,9 +41,9 @@ public class HomeActivity extends ActionBarActivity implements LocationListener 
     private static final int ONE_MINUTE = 60 * ONE_SECOND;
     private static final int TWO_MINUTES = 2 * ONE_MINUTE;
     private static final int FIVE_MINUTES = 5 * ONE_MINUTE;
-    private static final int THIRTY_MINUTES = 60 * ONE_MINUTE;
+    private static final int THIRTY_MINUTES = 30 * ONE_MINUTE;
 
-    private static final int PERIOD = FIVE_MINUTES;
+    private static int period = THIRTY_MINUTES;
 
     // The app's AlarmManager, which provides access to the system alarm services.
     private AlarmManager mgr;
@@ -62,6 +63,8 @@ public class HomeActivity extends ActionBarActivity implements LocationListener 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+        setPeriod();
+        updateGPSStatusText();
 
         phoneNumbers = AddressBookHandler.getPhoneNumbersFromContacts(getContentResolver());
         outputFoundContactsToScreen(phoneNumbers);
@@ -85,12 +88,12 @@ public class HomeActivity extends ActionBarActivity implements LocationListener 
 
                 Log.i("starting","user clicked start");
 
-
+                isGPSEnable();
                 setAlarm(new ArrayList(phoneNumbers.values()));
                 btnStart.setVisibility(View.GONE);
                 btnCancel.setVisibility(View.VISIBLE);
                 setAlarmStatusText(R.string.alarm_status_running);
-                Log.i("starting","timer launched");
+                Log.i("starting", "timer launched");
 
             }
         });
@@ -143,21 +146,62 @@ public class HomeActivity extends ActionBarActivity implements LocationListener 
         pi= PendingIntent.getBroadcast(this, 0, i, 0);
         mgr.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 SystemClock.elapsedRealtime(),
-                PERIOD,
+                period,
                 pi);
         Log.i("setAlarm","Alarm active");
     }
 
+    private void isGPSEnable(){
+        LocationManager service = (LocationManager) getSystemService(LOCATION_SERVICE);
+        boolean enabled = service
+                .isProviderEnabled(LocationManager.GPS_PROVIDER);
+        if (!enabled) {
+            Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            startActivity(intent);
+        }
+
+        updateGPSStatusText();
+    }
+
+    private void updateGPSStatusText() {
+        LocationManager service = (LocationManager) getSystemService(LOCATION_SERVICE);
+        boolean enabled = service.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        TextView gpsStatus = (TextView)findViewById(R.id.gps_status);
+        if (enabled) {
+            gpsStatus.setText(R.string.gps_status_running);
+        } else {
+            gpsStatus.setText(R.string.gps_status_stopped);
+        }
+    }
+
+    private void setPeriod() {
+        if (BuildConfig.DEBUG) {
+            period = FIVE_MINUTES;
+        } else {
+            period = THIRTY_MINUTES;
+        }
+
+        TextView periodStatus = (TextView)findViewById(R.id.broadcast_interval);
+        String unformattedStatus = getText(R.string.broadcast_interval).toString();
+        periodStatus.setText(String.format(unformattedStatus,period/ONE_MINUTE));
+    }
+
     private boolean isAlarmUp() {
-        return (PendingIntent.getBroadcast(this, 0,
+        return (getCurrentPendingIntent() != null);
+    }
+
+
+    private PendingIntent getCurrentPendingIntent() {
+        return PendingIntent.getBroadcast(this, 0,
                 new Intent(this, LocationPoller.class),
-                PendingIntent.FLAG_NO_CREATE) != null);
+                PendingIntent.FLAG_NO_CREATE);
     }
 
     public void cancelAlarm(Context context) {
         // If the alarm has been set, cancel it.
         if (mgr != null) {
             mgr.cancel(pi);
+            mgr.cancel(getCurrentPendingIntent());
         }
         Log.i("setAlarm","Alarm cancelled");
     }

@@ -3,6 +3,8 @@ package org.manchesterspaceprogramme.asapp.beacon;
 import android.location.Location;
 import android.util.AndroidException;
 
+import java.text.DecimalFormat;
+
 /**
  * Class to retrieve and hold our current position.
  *
@@ -58,7 +60,8 @@ public class GPSCoordinates {
 
     public String getAltitude() {
         if (location != null) {
-            return String.valueOf(location.getAltitude());
+            DecimalFormat df = new DecimalFormat("#");
+            return String.valueOf(df.format(location.getAltitude()));
         } else {
             throw new ExceptionInInitializerError("Location not obtained");
         }

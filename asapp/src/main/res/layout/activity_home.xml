@@ -1,85 +1,117 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scroll"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context=".HomeActivity">
+    android:fillViewport="true"
+    android:stackFromBottom="true"
+    android:transcriptMode="alwaysScroll" >
 
-    <TextView
-        android:id="@+id/header"
-        android:text="@string/app_name"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
-
-    <TextView
-        android:id="@+id/description"
-        android:text="@string/description"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_below="@+id/header"/>
-
-    <TextView
-        android:id="@+id/instructions"
-        android:text="@string/instructions"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_below="@+id/description"/>
-
-    <Button
-        android:id="@+id/start"
-        android:text="@string/btn_start"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:layout_below="@+id/instructions"
-        android:background="@drawable/start_button_shape"
-        android:textAppearance="?android:attr/textAppearanceButton"
-        android:layout_marginTop="20dp" />
-
-    <Button
-        android:id="@+id/cancel"
-        android:text="@string/btn_cancel"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:layout_below="@+id/instructions"
-        android:background="@drawable/cancel_button_shape"
-        android:textAppearance="?android:attr/textAppearanceButton"
-        android:layout_marginTop="20dp"  />
-
-    <TextView
-        android:id="@+id/contacts_found_header"
-        android:text="@string/contacts_found_header"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="100dp"
-        android:layout_below="@+id/instructions"/>
-
-    <ListView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/contacts"
-        android:layout_below="@+id/contacts_found_header"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="10dp" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
 
-    <TextView
-        android:id="@+id/alarm_status"
-        android:text="@string/alarm_status"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_below="@+id/contacts"
-        android:textAppearance="?android:attr/textAppearanceMedium"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:paddingTop="@dimen/activity_vertical_margin"
+            android:paddingBottom="@dimen/activity_vertical_margin"
+            tools:context=".HomeActivity">
+
+            <TextView
+                android:id="@+id/header"
+                android:text="@string/app_name"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
+            <TextView
+                android:id="@+id/description"
+                android:text="@string/description"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_below="@+id/header"/>
+
+            <TextView
+                android:id="@+id/instructions"
+                android:text="@string/instructions"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_below="@+id/description"/>
+
+            <Button
+                android:id="@+id/start"
+                android:text="@string/btn_start"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_below="@+id/instructions"
+                android:background="@drawable/start_button_shape"
+                android:textAppearance="?android:attr/textAppearanceButton"
+                android:layout_marginTop="20dp" />
+
+            <Button
+                android:id="@+id/cancel"
+                android:text="@string/btn_cancel"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_below="@+id/instructions"
+                android:background="@drawable/cancel_button_shape"
+                android:textAppearance="?android:attr/textAppearanceButton"
+                android:layout_marginTop="20dp"  />
+
+            <TextView
+                android:id="@+id/contacts_found_header"
+                android:text="@string/contacts_found_header"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="100dp"
+                android:layout_below="@+id/instructions"/>
+
+            <ListView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/contacts"
+                android:layout_below="@+id/contacts_found_header"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginTop="10dp" />
 
 
-</RelativeLayout>
+            <TextView
+                android:id="@+id/alarm_status"
+                android:text="@string/alarm_status"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_below="@+id/contacts"
+                android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+            <TextView
+                android:id="@+id/gps_status"
+                android:text="@string/gps_status"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_below="@+id/alarm_status"
+                android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+            <TextView
+                android:id="@+id/broadcast_interval"
+                android:text="@string/broadcast_interval"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_below="@+id/gps_status"
+                android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+        </RelativeLayout>
+    </LinearLayout>
+</ScrollView>
