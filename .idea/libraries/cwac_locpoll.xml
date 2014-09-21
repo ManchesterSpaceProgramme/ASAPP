@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="cwac-locpoll">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/asapp/libs/cwac-locpoll.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
